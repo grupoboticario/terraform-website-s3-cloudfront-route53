@@ -40,3 +40,9 @@ variable "default_root_object" {
   description = "CloudFront default root object"
   default     = "index.html"
 }
+
+variable "forward-query-string" {
+  type        = bool
+  description = "Forward the query string to the origin"
+  default     = true
+}

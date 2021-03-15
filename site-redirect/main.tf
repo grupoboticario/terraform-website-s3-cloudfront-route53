@@ -116,7 +116,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     cached_methods  = ["GET", "HEAD"]
 
     forwarded_values {
-      query_string = false
+      query_string = var.forward-query-string
 
       cookies {
         forward = "none"
