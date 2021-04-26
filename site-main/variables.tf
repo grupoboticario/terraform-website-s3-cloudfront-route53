@@ -129,11 +129,11 @@ variable "cache_policy_min_ttl" {
 }
 
 variable "cache_policy_id" {
-  default     = "S3-CORS-Caching"
+  default     = "668305c0-42b0-4b68-8ba7-3c16a9e74a55"
   description = "Name of cache policy previously created"
 }
 
 variable "origin_request_policy_id" {
-  default     = "Managed-CORS-S3Origin"
+  default     = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
   description = "Name of origin request policy previously created"
 }

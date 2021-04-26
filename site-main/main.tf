@@ -182,8 +182,8 @@ resource "aws_cloudfront_distribution" "website_cdn" {
       }
     }
 
-    cache_policy_id          = var.enable_cache_policy == true ? "S3-CORS-Caching" : null
-    origin_request_policy_id = var.enable_cache_policy == true ? "Managed-CORS-S3Origin" : null
+    cache_policy_id          = var.enable_cache_policy == true ? var.cache_policy_id : null
+    origin_request_policy_id = var.enable_cache_policy == true ? var.origin_request_policy_id : null
 
     # forwarded_values {
     #   query_string = var.forward-query-string
@@ -206,9 +206,9 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 
     trusted_signers = var.trusted_signers
 
-    # min_ttl          = var.enable_cache_policy == false ? var.min_ttl : null
-    # default_ttl      = var.enable_cache_policy == false ? var.default_ttl : null
-    # max_ttl          = var.enable_cache_policy == false ? var.max_ttl : null
+    min_ttl          = var.enable_cache_policy == false ? var.min_ttl : null
+    default_ttl      = var.enable_cache_policy == false ? var.default_ttl : null
+    max_ttl          = var.enable_cache_policy == false ? var.max_ttl : null
     target_origin_id = "origin-bucket-${aws_s3_bucket.website_bucket.id}"
 
     // This redirects any HTTP request to HTTPS. Security first!
