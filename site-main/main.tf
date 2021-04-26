@@ -53,7 +53,7 @@ locals {
   origin_domain_name     = aws_s3_bucket.website_bucket.website_endpoint
   origin_domain_name_oai = aws_s3_bucket.website_bucket.bucket_regional_domain_name
   origin_access_identity = var.enable_oai == true ? [aws_cloudfront_origin_access_identity.origin_access_identity[0].cloudfront_access_identity_path] : []
-  forwarded_values       = [{ query_string = var.forward-query-string, cookies = { forward = "none" } }]
+  forwarded_values       = { query_string = var.forward-query-string, cookies = { forward = "none" } }
 
   custom_origin_config = var.enable_oai == false ? [{
     origin_protocol_policy = "http-only"
@@ -193,16 +193,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     #   }
     # }
 
-    dynamic "forwarded_values" {
-      for_each = var.enable_cache_policy == false ? local.forwarded_values : []
-
-      content {
-        query_string = local.forwarded_values.query_string
-        cookies {
-          forward = local.forwarded_values.cookies.forward
-        }
-      }
-    }
+    forwarded_values = var.enable_cache_policy == false ? local.forwarded_values : null
 
     trusted_signers = var.trusted_signers
 
