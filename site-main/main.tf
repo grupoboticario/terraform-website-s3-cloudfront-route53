@@ -198,7 +198,9 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 
       content {
         query_string = local.forwarded_values.query_string
-        cookies      = local.forwarded_values.cookies
+        cookies {
+          forward = local.forwarded_values.cookies.forward
+        }
       }
     }
 
