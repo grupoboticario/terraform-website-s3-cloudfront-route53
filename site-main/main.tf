@@ -192,6 +192,17 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     #   }
     # }
 
+    dynamic "forwarded_values" {
+      for_each = var.enable_cache_policy != true ? var.enable_cache_policy : []
+
+      content {
+        query_string = var.forward-query-string
+        cookies {
+          forward = "none"
+        }
+      }
+    }
+
     trusted_signers = var.trusted_signers
 
     # min_ttl          = var.min_ttl
