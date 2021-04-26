@@ -185,14 +185,6 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     cache_policy_id          = var.enable_cache_policy == true ? var.cache_policy_id : null
     origin_request_policy_id = var.enable_cache_policy == true ? var.origin_request_policy_id : null
 
-    # forwarded_values {
-    #   query_string = var.forward-query-string
-    # 
-    #   cookies {
-    #     forward = "none"
-    #   }
-    # }
-
     dynamic "forwarded_values" {
       for_each = var.enable_cache_policy == false ? local.forwarded_values : []
 
