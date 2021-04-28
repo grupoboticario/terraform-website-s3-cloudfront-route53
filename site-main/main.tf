@@ -53,6 +53,7 @@ locals {
   origin_domain_name     = aws_s3_bucket.website_bucket.website_endpoint
   origin_domain_name_oai = aws_s3_bucket.website_bucket.bucket_regional_domain_name
   origin_access_identity = var.enable_oai == true ? [aws_cloudfront_origin_access_identity.origin_access_identity[0].cloudfront_access_identity_path] : []
+  forwarded_values       = [{ query_string = var.forward-query-string, cookies = { forward = "none" } }]
 
   custom_origin_config = var.enable_oai == false ? [{
     origin_protocol_policy = "http-only"
@@ -181,22 +182,25 @@ resource "aws_cloudfront_distribution" "website_cdn" {
       }
     }
 
-    cache_policy_id          = var.enable_cache_policy == true ? "S3-CORS-Caching" : null
-    origin_request_policy_id = var.enable_cache_policy == true ? "Managed-CORS-S3Origin" : null
+    cache_policy_id          = var.enable_cache_policy == true ? var.cache_policy_id : null
+    origin_request_policy_id = var.enable_cache_policy == true ? var.origin_request_policy_id : null
 
-    forwarded_values {
-      query_string = var.forward-query-string
+    dynamic "forwarded_values" {
+      for_each = var.enable_cache_policy == false ? local.forwarded_values : []
 
-      cookies {
-        forward = "none"
+      content {
+        query_string = lookup(local.forwarded_values[0], "query_string", true)
+        cookies {
+          forward = lookup(local.forwarded_values[0].cookies, "forward", "none")
+        }
       }
     }
 
     trusted_signers = var.trusted_signers
 
-    min_ttl          = var.min_ttl
-    default_ttl      = var.default_ttl
-    max_ttl          = var.max_ttl
+    min_ttl          = var.enable_cache_policy == false ? var.min_ttl : null
+    default_ttl      = var.enable_cache_policy == false ? var.default_ttl : null
+    max_ttl          = var.enable_cache_policy == false ? var.max_ttl : null
     target_origin_id = "origin-bucket-${aws_s3_bucket.website_bucket.id}"
 
     // This redirects any HTTP request to HTTPS. Security first!
