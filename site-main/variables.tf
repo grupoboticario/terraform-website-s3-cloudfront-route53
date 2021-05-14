@@ -17,11 +17,11 @@ variable "create_bucket" {
   default     = true
 }
 
-variable "website_bucket" {
-  type        = string
-  description = "The name of the S3 bucket to create."
-  default     = ""
-}
+# variable "website_bucket" {
+#   type        = string
+#   description = "The name of the S3 bucket to create."
+#   default     = ""
+# }
 
 variable "duplicate-content-penalty-secret" {
   type = string

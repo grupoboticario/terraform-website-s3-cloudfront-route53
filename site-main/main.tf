@@ -50,8 +50,8 @@ data "template_file" "bucket_policy" {
 }
 
 locals {
-  origin_domain_name     = var.create_bucket == true ? aws_s3_bucket.website_bucket[0].website_endpoint : var.website_bucket
-  origin_domain_name_oai = var.create_bucket == true ? aws_s3_bucket.website_bucket[0].bucket_regional_domain_name : var.website_bucket
+  origin_domain_name     = var.create_bucket == true ? aws_s3_bucket.website_bucket[0].website_endpoint : "${var.bucket_name}.s3.amazonaws.com"
+  origin_domain_name_oai = var.create_bucket == true ? aws_s3_bucket.website_bucket[0].bucket_regional_domain_name : "${var.bucket_name}.s3.amazonaws.com"
   origin_access_identity = var.enable_oai == true ? [aws_cloudfront_origin_access_identity.origin_access_identity[0].cloudfront_access_identity_path] : []
   forwarded_values       = [{ query_string = var.forward-query-string, cookies = { forward = "none" } }]
 
