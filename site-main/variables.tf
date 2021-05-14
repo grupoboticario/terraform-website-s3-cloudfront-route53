@@ -11,6 +11,18 @@ variable "bucket_name" {
   description = "The name of the S3 bucket to create."
 }
 
+variable "create_bucket" {
+  type        = bool
+  description = "The name of the S3 bucket to create."
+  default     = true
+}
+
+variable "website_bucket" {
+  type        = string
+  description = "The name of the S3 bucket to create."
+  default     = ""
+}
+
 variable "duplicate-content-penalty-secret" {
   type = string
 }
