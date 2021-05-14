@@ -14,13 +14,13 @@ output "website_cdn_zone_id" {
   value = aws_cloudfront_distribution.website_cdn.hosted_zone_id
 }
 
-output "website_bucket_id" {
-  value = aws_s3_bucket.website_bucket.id
-}
-
-output "website_bucket_arn" {
-  value = aws_s3_bucket.website_bucket.arn
-}
+# output "website_bucket_id" {
+#   value = aws_s3_bucket.website_bucket[0].id
+# }
+# 
+# output "website_bucket_arn" {
+#   value = aws_s3_bucket.website_bucket[0].arn
+# }
 
 output "origin_access_identity" {
   value = aws_cloudfront_origin_access_identity.origin_access_identity.*.iam_arn

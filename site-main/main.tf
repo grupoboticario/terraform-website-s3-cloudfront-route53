@@ -50,8 +50,8 @@ data "template_file" "bucket_policy" {
 }
 
 locals {
-  origin_domain_name     = var.create_bucket == true ? aws_s3_bucket.website_bucket.website_endpoint : var.website_bucket
-  origin_domain_name_oai = var.create_bucket == true ? aws_s3_bucket.website_bucket.bucket_regional_domain_name : var.website_bucket
+  origin_domain_name     = var.create_bucket == true ? aws_s3_bucket.website_bucket[0].website_endpoint : var.website_bucket
+  origin_domain_name_oai = var.create_bucket == true ? aws_s3_bucket.website_bucket[0].bucket_regional_domain_name : var.website_bucket
   origin_access_identity = var.enable_oai == true ? [aws_cloudfront_origin_access_identity.origin_access_identity[0].cloudfront_access_identity_path] : []
   forwarded_values       = [{ query_string = var.forward-query-string, cookies = { forward = "none" } }]
 
@@ -120,7 +120,7 @@ resource "aws_iam_policy_attachment" "site-deployer-attach-user-policy" {
   count      = var.create_bucket == true ? 1 : 0
   name       = "${var.bucket_name}-deployer-policy-attachment"
   users      = [var.deployer]
-  policy_arn = aws_iam_policy.site_deployer_policy.arn
+  policy_arn = aws_iam_policy.site_deployer_policy[0].arn
 }
 
 ################################################################################################################
@@ -132,7 +132,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   http_version = "http2"
 
   origin {
-    origin_id   = var.create_bucket == true ? "origin-bucket-${var.bucket_name}" : "origin-bucket-${aws_s3_bucket.website_bucket.id}"
+    origin_id   = var.create_bucket == true ? "origin-bucket-${aws_s3_bucket.website_bucket[0].id}" : "origin-bucket-${var.bucket_name}"
     domain_name = var.enable_oai == true ? local.origin_domain_name_oai : local.origin_domain_name
 
     dynamic "s3_origin_config" {
@@ -204,7 +204,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     min_ttl          = var.enable_cache_policy == false ? var.min_ttl : null
     default_ttl      = var.enable_cache_policy == false ? var.default_ttl : null
     max_ttl          = var.enable_cache_policy == false ? var.max_ttl : null
-    target_origin_id = "origin-bucket-${aws_s3_bucket.website_bucket.id}"
+    target_origin_id = var.create_bucket == true ? "origin-bucket-${aws_s3_bucket.website_bucket[0].id}" : "origin-bucket-${var.bucket_name}"
 
     // This redirects any HTTP request to HTTPS. Security first!
     viewer_protocol_policy = "redirect-to-https"
