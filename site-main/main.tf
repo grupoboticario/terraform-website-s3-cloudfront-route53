@@ -114,6 +114,7 @@ resource "aws_iam_policy" "site_deployer_policy" {
   path        = "/"
   description = "Policy allowing to publish a new version of the website to the S3 bucket"
   policy      = data.template_file.deployer_role_policy_file.rendered
+  tags        = var.tags
 }
 
 resource "aws_iam_policy_attachment" "site-deployer-attach-user-policy" {
