@@ -149,3 +149,8 @@ variable "origin_request_policy_id" {
   default     = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
   description = "Name of origin request policy previously created"
 }
+
+variable "web_acl_id" {
+  description = "ARN of WAF"
+  default     = null
+}
