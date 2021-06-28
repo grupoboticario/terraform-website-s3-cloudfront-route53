@@ -115,6 +115,14 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     allowed_methods = ["GET", "HEAD", "DELETE", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods  = ["GET", "HEAD"]
 
+    dynamic "lambda_function_association" {
+      for_each = var.enable_lambda_sec_headers == null ? [] : var.enable_lambda_sec_headers
+      content {
+        event_type = lambda_function_association.value.event_type
+        lambda_arn = lambda_function_association.value.lambda_arn
+      }
+    }
+
     forwarded_values {
       query_string = var.forward-query-string
 
