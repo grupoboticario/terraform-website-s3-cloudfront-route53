@@ -46,3 +46,13 @@ variable "forward-query-string" {
   description = "Forward the query string to the origin"
   default     = true
 }
+
+variable "enable_lambda_sec_headers" {
+  type = list(object({
+    event_type = string
+    lambda_arn = string
+  }))
+  default = null
+
+  description = "Specifies the lambda function of security headers"
+}

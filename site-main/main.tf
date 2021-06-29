@@ -131,6 +131,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   enabled      = true
   price_class  = var.price_class
   http_version = "http2"
+  web_acl_id   = var.web_acl_id != null ? var.web_acl_id : null
 
   origin {
     origin_id   = var.create_bucket == true ? "origin-bucket-${aws_s3_bucket.website_bucket[0].id}" : "origin-bucket-${var.bucket_name}"
