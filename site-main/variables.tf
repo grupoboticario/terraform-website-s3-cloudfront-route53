@@ -61,6 +61,12 @@ variable "trusted_signers" {
   default = []
 }
 
+variable "trusted_key_groups" {
+  type        = list(string)
+  default     = []
+  description = "A list of key group IDs that CloudFront can use to validate signed URLs or signed cookies."
+}
+
 variable "forward-query-string" {
   type        = bool
   description = "Forward the query string to the origin"
