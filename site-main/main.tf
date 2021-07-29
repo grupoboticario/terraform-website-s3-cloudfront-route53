@@ -202,6 +202,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     }
 
     trusted_signers = var.trusted_signers
+    trusted_key_groups = var.trusted_key_groups
 
     min_ttl          = var.enable_cache_policy == false ? var.min_ttl : null
     default_ttl      = var.enable_cache_policy == false ? var.default_ttl : null
