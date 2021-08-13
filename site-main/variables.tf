@@ -61,7 +61,14 @@ variable "trusted_signers" {
   default = []
 }
 
-variable "forward-query-string" {
+variable "forward_header_values" {
+  type        = list(string)
+  description = "A list of whitelisted header values to forward to the origin (incompatible with `cache_policy_id`)"
+  default     = ["Access-Control-Request-Headers", "Access-Control-Request-Method", "Origin"]
+}
+
+
+variable "forward-headers" {
   type        = bool
   description = "Forward the query string to the origin"
   default     = false
