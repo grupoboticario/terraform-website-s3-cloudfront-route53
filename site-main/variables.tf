@@ -154,3 +154,33 @@ variable "web_acl_id" {
   description = "ARN of WAF"
   default     = null
 }
+
+variable "ordered_cache" {
+  description = "Ordered Cache configuration"
+  type = list(object({
+    target_origin_id = string
+    path_pattern     = string
+
+    allowed_methods          = list(string)
+    cached_methods           = list(string)
+    cache_policy_id          = string
+    origin_request_policy_id = string
+    compress                 = bool
+
+    viewer_protocol_policy = string
+    min_ttl                = number
+    default_ttl            = number
+    max_ttl                = number
+
+    forward_query_string  = bool
+    forward_header_values = list(string)
+    forward_cookies       = string
+
+    lambda_function_association = list(object({
+      event_type   = string
+      include_body = bool
+      lambda_arn   = string
+    }))
+  }))
+  default = []
+}
