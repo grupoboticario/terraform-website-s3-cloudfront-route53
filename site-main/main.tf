@@ -64,14 +64,10 @@ locals {
 }
 
 resource "aws_s3_bucket" "website_bucket" {
-  count                   = var.create_bucket == true ? 1 : 0
-  bucket                  = var.bucket_name
-  policy                  = var.enable_oai == true ? data.template_file.bucket_policy_oai[0].rendered : data.template_file.bucket_policy.rendered
-  block_public_policy     = true
-  block_public_acls       = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-  acl                     = "private"
+  count  = var.create_bucket == true ? 1 : 0
+  bucket = var.bucket_name
+  policy = var.enable_oai == true ? data.template_file.bucket_policy_oai[0].rendered : data.template_file.bucket_policy.rendered
+  acl    = "private"
 
   versioning {
     enabled = var.versioning
@@ -83,6 +79,20 @@ resource "aws_s3_bucket" "website_bucket" {
     routing_rules  = var.routing_rules
   }
 
+  resource "aws_s3_bucket_public_access_block" "this" {
+    count = var.create_bucket == true ? 1 : 0
+
+    # Chain resources (s3_bucket -> s3_bucket_policy -> s3_bucket_public_access_block)
+    # to prevent "A conflicting conditional operation is currently in progress against this resource."
+    # Ref: https://github.com/hashicorp/terraform-provider-aws/issues/7628
+
+    bucket = aws_s3_bucket.website_bucket[0].id
+
+    block_public_policy     = true
+    block_public_acls       = true
+    ignore_public_acls      = true
+    restrict_public_buckets = true
+  }
 
   dynamic "cors_rule" {
     for_each = var.cors_rule_inputs == null ? [] : var.cors_rule_inputs
