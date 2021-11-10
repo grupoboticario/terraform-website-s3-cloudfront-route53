@@ -79,21 +79,6 @@ resource "aws_s3_bucket" "website_bucket" {
     routing_rules  = var.routing_rules
   }
 
-  resource "aws_s3_bucket_public_access_block" "this" {
-    count = var.create_bucket == true ? 1 : 0
-
-    # Chain resources (s3_bucket -> s3_bucket_policy -> s3_bucket_public_access_block)
-    # to prevent "A conflicting conditional operation is currently in progress against this resource."
-    # Ref: https://github.com/hashicorp/terraform-provider-aws/issues/7628
-
-    bucket = aws_s3_bucket.website_bucket[0].id
-
-    block_public_policy     = true
-    block_public_acls       = true
-    ignore_public_acls      = true
-    restrict_public_buckets = true
-  }
-
   dynamic "cors_rule" {
     for_each = var.cors_rule_inputs == null ? [] : var.cors_rule_inputs
 
@@ -106,6 +91,21 @@ resource "aws_s3_bucket" "website_bucket" {
   }
 
   tags = var.tags
+}
+
+resource "aws_s3_bucket_public_access_block" "this" {
+  count = var.create_bucket == true ? 1 : 0
+
+  # Chain resources (s3_bucket -> s3_bucket_policy -> s3_bucket_public_access_block)
+  # to prevent "A conflicting conditional operation is currently in progress against this resource."
+  # Ref: https://github.com/hashicorp/terraform-provider-aws/issues/7628
+
+  bucket = aws_s3_bucket.website_bucket[0].id
+
+  block_public_policy     = true
+  block_public_acls       = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 //  logging {
 //    target_bucket = "${var.log_bucket}"
