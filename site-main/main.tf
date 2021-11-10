@@ -64,9 +64,14 @@ locals {
 }
 
 resource "aws_s3_bucket" "website_bucket" {
-  count  = var.create_bucket == true ? 1 : 0
-  bucket = var.bucket_name
-  policy = var.enable_oai == true ? data.template_file.bucket_policy_oai[0].rendered : data.template_file.bucket_policy.rendered
+  count                   = var.create_bucket == true ? 1 : 0
+  bucket                  = var.bucket_name
+  policy                  = var.enable_oai == true ? data.template_file.bucket_policy_oai[0].rendered : data.template_file.bucket_policy.rendered
+  block_public_policy     = true
+  block_public_acls       = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+  acl                     = "private"
 
   versioning {
     enabled = var.versioning
