@@ -23,13 +23,14 @@ locals {
       "domain" = replace(var.domain, "*", "star")
     },
   )
+  bucket_name = "site-${replace(replace(var.domain, ".", "-"), "*", "star")}"
 }
 
 data "template_file" "bucket_policy_oai" {
   template = file("${path.module}/website_bucket_policy_oai.json")
 
   vars = {
-    bucket  = "site.${replace(replace(var.domain, ".", "-"), "*", "star")}"
+    bucket  = local.bucket_name
     secret  = var.duplicate-content-penalty-secret
     iam_arn = aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn
   }
@@ -48,7 +49,7 @@ data "template_file" "bucket_policy" {
 }
 
 resource "aws_s3_bucket" "website_bucket" {
-  bucket = "site.${replace(replace(var.domain, ".", "-"), "*", "star")}"
+  bucket = local.bucket_name
   policy = data.template_file.bucket_policy_oai.rendered
   acl    = "private"
 
