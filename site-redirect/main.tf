@@ -117,7 +117,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 
   origin {
     origin_id   = "origin-bucket-${aws_s3_bucket.website_bucket.id}"
-    domain_name = aws_s3_bucket.website_bucket.website_endpoint
+    domain_name = aws_s3_bucket.website_bucket.bucket_regional_domain_name
 
     dynamic "s3_origin_config" {
       for_each = [aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path]
