@@ -125,11 +125,14 @@ resource "aws_cloudfront_distribution" "website_cdn" {
       }
     }
 
-    custom_origin_config {
-      origin_protocol_policy = "http-only"
-      http_port              = "80"
-      https_port             = "443"
-      origin_ssl_protocols   = ["TLSv1"]
+    dynamic "custom_origin_config" {
+      for_each = local.custom_origin_config == null ? [] : local.custom_origin_config
+      content {
+        origin_protocol_policy = custom_origin_config.value.origin_protocol_policy
+        http_port              = custom_origin_config.value.http_port
+        https_port             = custom_origin_config.value.https_port
+        origin_ssl_protocols   = custom_origin_config.value.origin_ssl_protocols
+      }
     }
 
     custom_header {
