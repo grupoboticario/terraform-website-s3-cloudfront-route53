@@ -142,7 +142,7 @@ resource "aws_iam_policy" "site_deployer_policy" {
 }
 
 resource "aws_iam_policy_attachment" "site-deployer-attach-user-policy" {
-  count      = var.create_bucket == true ? (var.deployer != "" ? 1 : 0) : 0
+  count      = var.create_bucket == true ? (var.deployer != null ? 1 : 0) : 0
   name       = "${var.bucket_name}-deployer-policy-attachment"
   users      = [var.deployer]
   policy_arn = aws_iam_policy.site_deployer_policy[0].arn
