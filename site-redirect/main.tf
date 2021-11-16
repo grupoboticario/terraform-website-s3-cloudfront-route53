@@ -29,7 +29,7 @@ data "template_file" "bucket_policy_oai" {
   template = file("${path.module}/website_bucket_policy_oai.json")
 
   vars = {
-    bucket  = var.bucket_name
+    bucket  = aws_s3_bucket.website_bucket.id
     secret  = var.duplicate-content-penalty-secret
     iam_arn = aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn
   }
