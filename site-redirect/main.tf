@@ -25,6 +25,16 @@ locals {
   )
 }
 
+data "template_file" "bucket_policy_oai" {
+  template = file("${path.module}/website_bucket_policy_oai.json")
+
+  vars = {
+    bucket  = var.bucket_name
+    secret  = var.duplicate-content-penalty-secret
+    iam_arn = aws_cloudfront_origin_access_identity.origin_access_identity[0].iam_arn
+  }
+}
+
 ################################################################################################################
 ## Configure the bucket and static website hosting
 ################################################################################################################
@@ -39,10 +49,20 @@ data "template_file" "bucket_policy" {
 
 resource "aws_s3_bucket" "website_bucket" {
   bucket = "site.${replace(replace(var.domain, ".", "-"), "*", "star")}"
-  policy = data.template_file.bucket_policy.rendered
+  policy = data.template_file.bucket_policy_oai.rendered
+  acl    = "private"
 
   website {
     redirect_all_requests_to = "https://${var.target}"
+  }
+
+  server_side_encryption_configuration {
+    rule {
+      bucket_key_enabled = false
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
   }
 
   //  logging {
@@ -51,6 +71,15 @@ resource "aws_s3_bucket" "website_bucket" {
   //  }
 
   tags = local.tags
+}
+
+resource "aws_s3_bucket_public_access_block" "this" {
+  bucket = aws_s3_bucket.website_bucket.id
+
+  block_public_policy     = true
+  block_public_acls       = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 ################################################################################################################
@@ -88,6 +117,13 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   origin {
     origin_id   = "origin-bucket-${aws_s3_bucket.website_bucket.id}"
     domain_name = aws_s3_bucket.website_bucket.website_endpoint
+
+    dynamic "s3_origin_config" {
+      for_each = [aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path]
+      content {
+        origin_access_identity = s3_origin_config.value
+      }
+    }
 
     custom_origin_config {
       origin_protocol_policy = "http-only"
@@ -156,4 +192,12 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   aliases = [var.domain]
 
   tags = local.tags
+}
+
+################################################################################################################
+## Create Cloudfront OAI
+################################################################################################################
+
+resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
+  comment = "Create OAI to use in CF"
 }

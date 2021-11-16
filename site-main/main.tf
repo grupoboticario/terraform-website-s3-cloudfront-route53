@@ -199,6 +199,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     response_code         = "200"
     response_page_path    = var.not-found-response-path
   }
+
   default_cache_behavior {
     allowed_methods = ["GET", "HEAD", "DELETE", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods  = ["GET", "HEAD"]
