@@ -119,11 +119,11 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     origin_id   = "origin-bucket-${aws_s3_bucket.website_bucket.id}"
     domain_name = aws_s3_bucket.website_bucket.website_endpoint
 
-    dynamic "s3_origin_config" {
-      for_each = [aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path]
-      content {
-        origin_access_identity = s3_origin_config.value
-      }
+    custom_origin_config {
+      origin_protocol_policy = "http-only"
+      http_port              = "80"
+      https_port             = "443"
+      origin_ssl_protocols   = ["TLSv1.2"]
     }
 
     custom_header {
