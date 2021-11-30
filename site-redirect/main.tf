@@ -117,7 +117,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 
   origin {
     origin_id   = "origin-bucket-${aws_s3_bucket.website_bucket.id}"
-    domain_name = aws_s3_bucket.website_bucket.bucket_regional_domain_name
+    domain_name = aws_s3_bucket.website_bucket.website_endpoint
 
     dynamic "s3_origin_config" {
       for_each = [aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path]
@@ -180,7 +180,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   viewer_certificate {
     acm_certificate_arn      = var.acm-certificate-arn
     ssl_support_method       = "sni-only"
-    minimum_protocol_version = "TLSv1"
+    minimum_protocol_version = "TLSv1.2_2019"
   }
 
   aliases = [var.domain]
