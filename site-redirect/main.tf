@@ -193,5 +193,5 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 ################################################################################################################
 
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
-  comment = "Create OAI to use in CF: ${aws_cloudfront_distribution.website_cdn.domain_name}"
+  comment = "Create OAI to use in CF: ${var.target}"
 }
