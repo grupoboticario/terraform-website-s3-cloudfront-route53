@@ -261,7 +261,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
   count   = var.enable_oai == true ? 1 : 0
-  comment = "Create OAI to use in CF"
+  comment = "Create OAI to use in CF: ${var.domain}"
 }
 
 ################################################################################################################

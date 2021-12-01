@@ -23,7 +23,7 @@ locals {
       "domain" = replace(var.domain, "*", "star")
     },
   )
-  bucket_name = "site-${replace(replace(var.domain, ".", "-"), "*", "star")}"
+  bucket_name = "site-${replace(replace(var.domain, ".", "-"), "*", "star")}-redirect"
 }
 
 data "template_file" "bucket_policy_oai" {
@@ -117,13 +117,13 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 
   origin {
     origin_id   = "origin-bucket-${aws_s3_bucket.website_bucket.id}"
-    domain_name = aws_s3_bucket.website_bucket.bucket_regional_domain_name
+    domain_name = aws_s3_bucket.website_bucket.website_endpoint
 
-    dynamic "s3_origin_config" {
-      for_each = [aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path]
-      content {
-        origin_access_identity = s3_origin_config.value
-      }
+    custom_origin_config {
+      origin_protocol_policy = "http-only"
+      http_port              = "80"
+      https_port             = "443"
+      origin_ssl_protocols   = ["TLSv1.2"]
     }
 
     custom_header {
@@ -180,7 +180,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   viewer_certificate {
     acm_certificate_arn      = var.acm-certificate-arn
     ssl_support_method       = "sni-only"
-    minimum_protocol_version = "TLSv1"
+    minimum_protocol_version = "TLSv1.2_2019"
   }
 
   aliases = [var.domain]
@@ -193,5 +193,5 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 ################################################################################################################
 
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
-  comment = "Create OAI to use in CF"
+  comment = "Create OAI to use in CF: ${var.target}"
 }
