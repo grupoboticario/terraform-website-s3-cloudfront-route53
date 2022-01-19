@@ -113,8 +113,8 @@ variable "enable_lambda_sec_headers" {
 
 variable "enable_function_association" {
   type = list(object({
-    event_type = string
-    lambda_arn = string
+    event_type   = string
+    function_arn = string
   }))
   default = null
 
