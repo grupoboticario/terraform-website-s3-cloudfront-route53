@@ -212,6 +212,14 @@ resource "aws_cloudfront_distribution" "website_cdn" {
       }
     }
 
+    dynamic "function_association" {
+      for_each = var.enable_function_association == null ? [] : var.enable_function_association
+      content {
+        event_type = function_association.value.event_type
+        lambda_arn = function_association.value.lambda_arn
+      }
+    }
+
     cache_policy_id          = var.enable_cache_policy == true ? var.cache_policy_id : null
     origin_request_policy_id = var.enable_cache_policy == true ? var.origin_request_policy_id : null
 
