@@ -215,8 +215,8 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     dynamic "function_association" {
       for_each = var.enable_function_association == null ? [] : var.enable_function_association
       content {
-        event_type = function_association.value.event_type
-        lambda_arn = function_association.value.lambda_arn
+        event_type   = function_association.value.event_type
+        function_arn = function_association.value.function_arn
       }
     }
 
