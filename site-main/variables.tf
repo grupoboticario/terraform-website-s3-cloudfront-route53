@@ -160,3 +160,8 @@ variable "web_acl_id" {
   description = "ARN of WAF"
   default     = null
 }
+
+variable "cfadditional_origins" {
+  type = list(map(string))
+  default = []
+}
