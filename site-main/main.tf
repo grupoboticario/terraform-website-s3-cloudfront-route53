@@ -184,6 +184,53 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     }
   }
 
+  ##### COOKIE LAMBDA
+  dynamic "origin" {
+    for_each = length(var.cfadditional_origins) == 0 ? [] : var.cfadditional_origins
+    content {
+      domain_name = origin.value["origin"]
+      origin_path = origin.value["path"]
+      origin_id = origin.value["origin_id"]
+
+      connection_attempts = 3
+      connection_timeout = 10
+      custom_origin_config {
+        http_port = 80
+        https_port = 443
+        origin_protocol_policy = "https-only"
+        origin_keepalive_timeout = 5
+        origin_read_timeout = 30            
+        origin_ssl_protocols =  ["TLSv1", "TLSv1.1", "TLSv1.2"]
+      }
+    }
+  }
+
+  dynamic "ordered_cache_behavior" {
+    for_each = length(var.cfadditional_origins) == 0 ? [] : var.cfadditional_origins
+    content {
+      path_pattern     = ordered_cache_behavior.value["path_pattern"]
+      allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+      cached_methods   = ["GET", "HEAD", "OPTIONS"]
+      target_origin_id =  ordered_cache_behavior.value["origin_id"]
+
+      forwarded_values {
+        query_string = true
+        headers      = ["Authorization"]
+        cookies {
+          forward = "all"
+        }
+      }
+
+      min_ttl                = 0
+      default_ttl            = 86400
+      max_ttl                = 31536000
+      compress               = true
+      viewer_protocol_policy = "redirect-to-https"
+    }
+  }
+
+  #################
+
   default_root_object = var.default-root-object
 
   custom_error_response {
