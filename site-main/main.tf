@@ -133,19 +133,20 @@ data "template_file" "deployer_role_policy_file" {
 }
 
 resource "aws_iam_policy" "site_deployer_policy" {
-  count       = var.create_bucket == true ? 1 : 0
+  count = var.deployer != null ? 1 : 0
+
   name        = "${var.bucket_name}.deployer"
   path        = "/"
   description = "Policy allowing to publish a new version of the website to the S3 bucket"
   policy      = data.template_file.deployer_role_policy_file.rendered
-  tags        = var.tags
 }
 
 resource "aws_iam_policy_attachment" "site-deployer-attach-user-policy" {
-  count      = var.create_bucket == true ? (var.deployer != null ? 1 : 0) : 0
+  count = var.deployer != null ? 1 : 0
+
   name       = "${var.bucket_name}-deployer-policy-attachment"
   users      = [var.deployer]
-  policy_arn = aws_iam_policy.site_deployer_policy[0].arn
+  policy_arn = aws_iam_policy.site_deployer_policy.0.arn
 }
 
 ################################################################################################################
