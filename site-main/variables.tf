@@ -27,11 +27,6 @@ variable "duplicate-content-penalty-secret" {
   type = string
 }
 
-variable "deployer" {
-  type    = string
-  default = null
-}
-
 variable "acm-certificate-arn" {
   type = string
 }

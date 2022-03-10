@@ -84,30 +84,6 @@ resource "aws_s3_bucket_public_access_block" "this" {
 }
 
 ################################################################################################################
-## Configure the credentials and access to the bucket for a deployment user
-################################################################################################################
-data "template_file" "deployer_role_policy_file" {
-  template = file("${path.module}/deployer_role_policy.json")
-
-  vars = {
-    bucket = "site.${replace(replace(var.domain, ".", "-"), "*", "star")}"
-  }
-}
-
-resource "aws_iam_policy" "site_deployer_policy" {
-  name        = "site.${replace(replace(var.domain, ".", "-"), "*", "star")}.deployer"
-  path        = "/"
-  description = "Policy allowing to publish a new version of the website to the S3 bucket"
-  policy      = data.template_file.deployer_role_policy_file.rendered
-}
-
-resource "aws_iam_policy_attachment" "staging-site-deployer-attach-user-policy" {
-  name       = "site.${replace(replace(var.domain, ".", "-"), "*", "star")}-deployer-policy-attachment"
-  users      = [var.deployer]
-  policy_arn = aws_iam_policy.site_deployer_policy.arn
-}
-
-################################################################################################################
 ## Create a Cloudfront distribution for the static website
 ################################################################################################################
 resource "aws_cloudfront_distribution" "website_cdn" {
