@@ -66,19 +66,67 @@ locals {
 resource "aws_s3_bucket" "website_bucket" {
   count  = var.create_bucket == true ? 1 : 0
   bucket = var.bucket_name
-  policy = var.enable_oai == true ? data.template_file.bucket_policy_oai[0].rendered : data.template_file.bucket_policy.rendered
+
+  tags = var.tags
+}
+
+resource "aws_s3_bucket_acl" "website_bucket" {
+  count  = var.create_bucket == true ? 1 : 0
+  bucket = aws_s3_bucket.website_bucket[0].id
   acl    = "private"
+}
 
-  versioning {
-    enabled = var.versioning
+resource "aws_s3_bucket_policy" "website_bucket" {
+  count  = var.create_bucket == true ? 1 : 0
+  bucket = aws_s3_bucket.website_bucket[0].id
+  policy = var.enable_oai == true ? data.template_file.bucket_policy_oai[0].rendered : data.template_file.bucket_policy.rendered
+}
+
+resource "aws_s3_bucket_website_configuration" "website_bucket" {
+  count  = var.create_bucket == true ? 1 : 0
+  bucket = aws_s3_bucket.website_bucket[0].id
+
+  index_document {
+    suffix = "index.html"
   }
 
-  website {
-    index_document = "index.html"
-    error_document = "404.html"
-    routing_rules  = var.routing_rules
+  error_document {
+    key = "404.html"
   }
 
+  routing_rule {
+    condition {
+      key_prefix_equals = var.routing_rules
+    }
+    redirect {
+      replace_key_prefix_with = var.routing_rules
+    }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "website_bucket" {
+  count  = var.create_bucket == true ? 1 : 0
+  bucket = aws_s3_bucket.website_bucket[0].id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "website_bucket" {
+  count  = var.create_bucket == true ? 1 : 0
+  bucket = aws_s3_bucket.website_bucket[0].id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_cors_configuration" "website_bucket" {
+  count  = var.create_bucket == true ? 1 : 0
+  bucket = aws_s3_bucket.website_bucket[0].id
+  
   dynamic "cors_rule" {
     for_each = var.cors_rule_inputs == null ? [] : var.cors_rule_inputs
 
@@ -88,18 +136,6 @@ resource "aws_s3_bucket" "website_bucket" {
       allowed_origins = cors_rule.value.allowed_origins
       expose_headers  = cors_rule.value.expose_headers
     }
-  }
-
-  server_side_encryption_configuration {
-    rule {
-      bucket_key_enabled = false
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
-
-  tags = var.tags
 }
 
 resource "aws_s3_bucket_public_access_block" "this" {
