@@ -32,7 +32,10 @@ variable "acm-certificate-arn" {
 }
 
 variable "routing_rules" {
-  type    = list(object)
+  type = list(object({
+    routing_rules_condition = string
+    routing_rules_redirect  = string
+  }))
   default = null
 }
 
