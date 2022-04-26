@@ -94,12 +94,13 @@ resource "aws_s3_bucket_website_configuration" "website_bucket" {
     key = "404.html"
   }
 
-  routing_rule {
+  dynamic "routing_rule" {
+    for_each = var.routing_rules
     condition {
-      key_prefix_equals = var.routing_rules
+      key_prefix_equals = routing_rule.routing_rules_condition
     }
     redirect {
-      replace_key_prefix_with = var.routing_rules
+      replace_key_prefix_with = routing_rule.routing_rules_redirect
     }
   }
 }

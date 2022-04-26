@@ -32,8 +32,8 @@ variable "acm-certificate-arn" {
 }
 
 variable "routing_rules" {
-  type    = string
-  default = ""
+  type    = list(object)
+  default = null
 }
 
 variable "default-root-object" {
