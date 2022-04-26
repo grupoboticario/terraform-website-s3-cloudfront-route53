@@ -36,7 +36,7 @@ variable "routing_rules" {
     routing_rules_condition = string
     routing_rules_redirect  = string
   }))
-  default = null
+  default = []
 }
 
 variable "default-root-object" {
