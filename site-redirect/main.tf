@@ -50,9 +50,7 @@ data "template_file" "bucket_policy" {
 
 resource "aws_s3_bucket" "website_bucket" {
   bucket = local.bucket_name
-  policy = data.template_file.bucket_policy_oai.rendered
-
-  tags = local.tags
+  tags   = local.tags
 }
 
 resource "aws_s3_bucket_website_configuration" "website_bucket" {
