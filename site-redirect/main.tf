@@ -50,28 +50,43 @@ data "template_file" "bucket_policy" {
 
 resource "aws_s3_bucket" "website_bucket" {
   bucket = local.bucket_name
-  policy = data.template_file.bucket_policy_oai.rendered
-  acl    = "private"
+  tags   = local.tags
+}
 
-  website {
-    redirect_all_requests_to = "https://${var.target}"
+resource "aws_s3_bucket_website_configuration" "website_bucket" {
+  bucket = aws_s3_bucket.website_bucket.id
+
+  redirect_all_requests_to {
+    host_name = var.target
+    protocol  = "https"
   }
+}
 
-  server_side_encryption_configuration {
-    rule {
-      bucket_key_enabled = false
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
+resource "aws_s3_bucket_policy" "website_bucket" {
+  bucket = aws_s3_bucket.website_bucket.id
+  policy = data.template_file.bucket_policy_oai.rendered
+}
+
+resource "aws_s3_bucket_acl" "website_bucket" {
+  bucket = aws_s3_bucket.website_bucket.id
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_versioning" "website_bucket" {
+  bucket = aws_s3_bucket.website_bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "website_bucket" {
+  bucket = aws_s3_bucket.website_bucket.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
     }
   }
-
-  //  logging {
-  //    target_bucket = "${var.log_bucket}"
-  //    target_prefix = "${var.log_bucket_prefix}"
-  //  }
-
-  tags = local.tags
 }
 
 resource "aws_s3_bucket_public_access_block" "this" {
