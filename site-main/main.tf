@@ -127,7 +127,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "website_bucket" {
 }
 
 resource "aws_s3_bucket_cors_configuration" "website_bucket" {
-  count  = var.create_bucket == true ? 1 : 0
+  count  = var.create_bucket == true && length(var.cors_rule_inputs) != 0 ? 1 : 0
   bucket = aws_s3_bucket.website_bucket[0].id
 
   dynamic "cors_rule" {
