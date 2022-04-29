@@ -94,7 +94,7 @@ variable "cors_rule_inputs" {
     allowed_origins = list(string)
     expose_headers  = list(string)
   }))
-  default = null
+  default = []
 
   description = "Specifies the allowed headers, methods, origins and exposed headers when using CORS on this bucket"
 }
