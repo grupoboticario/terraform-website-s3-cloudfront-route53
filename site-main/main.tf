@@ -16,38 +16,6 @@
 ##    certificates must be requested in region us-east-1
 ################################################################################################################
 
-#locals {
-#  tags = merge(
-#    var.tags,
-#    {
-#      "domain" = var.domain
-#    },
-#  )
-#}
-
-################################################################################################################
-## Configure the bucket and static website hosting
-################################################################################################################
-
-data "template_file" "bucket_policy_oai" {
-  count    = var.enable_oai == true ? 1 : 0
-  template = file("${path.module}/website_bucket_policy_oai.json")
-
-  vars = {
-    bucket  = var.bucket_name
-    secret  = var.duplicate-content-penalty-secret
-    iam_arn = aws_cloudfront_origin_access_identity.origin_access_identity[0].iam_arn
-  }
-}
-
-data "template_file" "bucket_policy" {
-  template = file("${path.module}/website_bucket_policy.json")
-
-  vars = {
-    bucket = var.bucket_name
-    secret = var.duplicate-content-penalty-secret
-  }
-}
 
 locals {
   origin_domain_name     = var.create_bucket == true ? aws_s3_bucket.website_bucket[0].website_endpoint : "${var.bucket_name}.s3.amazonaws.com"
@@ -79,7 +47,8 @@ resource "aws_s3_bucket_acl" "website_bucket" {
 resource "aws_s3_bucket_policy" "website_bucket" {
   count  = var.create_bucket == true ? 1 : 0
   bucket = aws_s3_bucket.website_bucket[0].id
-  policy = var.enable_oai == true ? data.template_file.bucket_policy_oai[0].rendered : data.template_file.bucket_policy.rendered
+  # policy = data.template_file.bucket_policy_oai[0].rendered
+  policy = templatefile("${path.module}/website_bucket_policy_oai.tftpl", { iam_arn = aws_cloudfront_origin_access_identity.origin_access_identity[0].iam_arn, bucket = var.bucket_name })
 }
 
 resource "aws_s3_bucket_website_configuration" "website_bucket" {
@@ -284,55 +253,3 @@ resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
   count   = var.enable_oai == true ? 1 : 0
   comment = "Create OAI to use in CF: ${var.domain[0]}"
 }
-
-################################################################################################################
-## Cache Policy
-################################################################################################################
-
-# resource "aws_cloudfront_cache_policy" "main" {
-#   count = var.enable_cache_policy == true ? 1 : 0
-# 
-#   name        = "behavior-s3-cors-Cache"
-#   default_ttl = var.cache_policy_default_ttl
-#   max_ttl     = var.cache_policy_max_ttl
-#   min_ttl     = var.cache_policy_min_ttl
-# 
-#   parameters_in_cache_key_and_forwarded_to_origin {
-#     headers_config {
-#       header_behavior = "whitelist"
-#       headers {
-#         items = ["origin"]
-#       }
-#     }
-#     cookies_config {
-#       cookie_behavior = "none"
-#     }
-#     query_strings_config {
-#       query_string_behavior = "all"
-#     }
-#   }
-# }
-
-################################################################################################################
-## Origin Request Policy
-################################################################################################################
-# 
-# resource "aws_cloudfront_origin_request_policy" "main" {
-#   count = var.enable_cache_policy == true ? 1 : 0
-# 
-#   name    = "behavior-managed-cors-s3-origin"
-#   comment = "Policy for S3 origin with CORS"
-# 
-#   headers_config {
-#     header_behavior = "whitelist"
-#     headers {
-#       items = ["origin", "access-control-request-headers", "access-control-request-method"]
-#     }
-#   }
-#   cookies_config {
-#     cookie_behavior = "none"
-#   }
-#   query_strings_config {
-#     query_string_behavior = "none"
-#   }
-# }
