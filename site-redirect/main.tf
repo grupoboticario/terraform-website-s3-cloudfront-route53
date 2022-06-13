@@ -26,28 +26,9 @@ locals {
   bucket_name = "site-${replace(replace(var.domain, ".", "-"), "*", "star")}-redirect"
 }
 
-data "template_file" "bucket_policy_oai" {
-  template = file("${path.module}/website_bucket_policy_oai.json")
-
-  vars = {
-    bucket  = local.bucket_name
-    secret  = var.duplicate-content-penalty-secret
-    iam_arn = aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn
-  }
-}
-
 ################################################################################################################
 ## Configure the bucket and static website hosting
 ################################################################################################################
-data "template_file" "bucket_policy" {
-  template = file("${path.module}/website_redirect_bucket_policy.json")
-
-  vars = {
-    bucket = "site.${replace(replace(var.domain, ".", "-"), "*", "star")}"
-    secret = var.duplicate-content-penalty-secret
-  }
-}
-
 resource "aws_s3_bucket" "website_bucket" {
   bucket = local.bucket_name
   tags   = local.tags
@@ -60,11 +41,6 @@ resource "aws_s3_bucket_website_configuration" "website_bucket" {
     host_name = var.target
     protocol  = "https"
   }
-}
-
-resource "aws_s3_bucket_policy" "website_bucket" {
-  bucket = aws_s3_bucket.website_bucket.id
-  policy = data.template_file.bucket_policy_oai.rendered
 }
 
 resource "aws_s3_bucket_acl" "website_bucket" {
@@ -174,12 +150,4 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   aliases = [var.domain]
 
   tags = local.tags
-}
-
-################################################################################################################
-## Create Cloudfront OAI
-################################################################################################################
-
-resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
-  comment = "Create OAI to use in CF: ${var.target}"
 }
