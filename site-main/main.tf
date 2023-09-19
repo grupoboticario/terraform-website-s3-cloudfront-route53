@@ -38,16 +38,9 @@ resource "aws_s3_bucket" "website_bucket" {
   tags = var.tags
 }
 
-resource "aws_s3_bucket_acl" "website_bucket" {
-  count  = var.create_bucket == true ? 1 : 0
-  bucket = aws_s3_bucket.website_bucket[0].id
-  acl    = "private"
-}
-
 resource "aws_s3_bucket_policy" "website_bucket" {
   count  = var.create_bucket == true ? 1 : 0
   bucket = aws_s3_bucket.website_bucket[0].id
-  # policy = data.template_file.bucket_policy_oai[0].rendered
   policy = templatefile("${path.module}/website_bucket_policy_oai.tftpl", { iam_arn = aws_cloudfront_origin_access_identity.origin_access_identity[0].iam_arn, bucket = var.bucket_name })
 }
 
@@ -125,10 +118,6 @@ resource "aws_s3_bucket_public_access_block" "this" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
-//  logging {
-//    target_bucket = "${var.log_bucket}"
-//    target_prefix = "${var.log_bucket_prefix}"
-//  }
 
 ################################################################################################################
 ## Create a Cloudfront distribution for the static website
