@@ -163,3 +163,8 @@ variable "web_acl_id" {
   description = "ARN of WAF"
   default     = null
 }
+
+variable "origin_path" {
+  description = "Optional element that causes CloudFront to request your content from a directory in your Amazon S3 bucket or your custom origin."
+  default     = null
+}
