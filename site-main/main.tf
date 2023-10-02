@@ -131,6 +131,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   origin {
     origin_id   = var.create_bucket == true ? "origin-bucket-${aws_s3_bucket.website_bucket[0].id}" : "origin-bucket-${var.bucket_name}"
     domain_name = var.enable_oai == true ? local.origin_domain_name_oai : local.origin_domain_name
+    origin_path = var.origin_path != null ? var.origin_path : null
 
     dynamic "s3_origin_config" {
       for_each = local.origin_access_identity == null ? [] : local.origin_access_identity
