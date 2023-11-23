@@ -202,6 +202,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   default_cache_behavior {
     allowed_methods = ["GET", "HEAD", "DELETE", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods  = ["GET", "HEAD"]
+    response_headers_policy_id = var.response_headers_policy_id
 
     dynamic "lambda_function_association" {
       for_each = var.enable_lambda_sec_headers == null ? [] : var.enable_lambda_sec_headers

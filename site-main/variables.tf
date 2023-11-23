@@ -155,3 +155,8 @@ variable "web_acl_id" {
   description = "ARN of WAF"
   default     = null
 }
+
+variable "response_headers_policy_id" {
+  description = "Response hearders policy"
+  default     = null
+}
